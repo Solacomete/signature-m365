@@ -1,33 +1,30 @@
 Office.onReady();
 
 function insertSignature(event) {
-    // 1. Récupérer l'email de la personne qui tape le message
+    // 1. Récupère l'adresse email de l'utilisateur actif dans Outlook
     const userEmail = Office.context.mailbox.userProfile.emailAddress;
 
-    // 2. HTML de test codé en dur (en attendant l'API)
-    const testSignature = `
-        <br><br>
-        <div style="font-family: Arial, sans-serif; font-size: 10pt; color: #333;">
-            <p><strong>Testeur Interne</strong></p>
-            <p>Direction des Systèmes d'Information</p>
-            <p>${userEmail}</p>
-            <img src="https://solacomete.github.io/signature-m365/icon-64.png" alt="Bannière Test">
-        </div>
-    `;
-
-    // 3. Insérer la signature
-    Office.context.mailbox.item.body.setSignatureAsync(
-        testSignature,
-        { coercionType: Office.CoercionType.Html },
-        function (asyncResult) {
-            if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-                console.error("Erreur : " + asyncResult.error.message);
+    // 2. Interroge ton API Cloudflare Workers en lui passant l'email
+    fetch(`https://signature-m365.louis-b15.workers.dev/?email=${userEmail}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.html) {
+                // 3. Injecte le HTML reçu de l'API dans le mail
+                Office.context.mailbox.item.body.setSignatureAsync(
+                    data.html,
+                    { coercionType: Office.CoercionType.Html },
+                    function (asyncResult) {
+                        event.completed(); // Libère le thread Outlook
+                    }
+                );
+            } else {
+                event.completed();
             }
-            // 4. Clôturer l'événement (Obligatoire pour que le mail se charge)
+        })
+        .catch(error => {
+            console.error("Erreur API Signature:", error);
             event.completed();
-        }
-    );
+        });
 }
 
-// 5. Exposer la fonction à Outlook
 Office.actions.associate("insertSignature", insertSignature);
