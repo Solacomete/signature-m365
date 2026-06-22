@@ -33,7 +33,7 @@
     </Hosts>
     <Resources>
       <bt:Urls>
-        <bt:Url id="JSRuntime.Url" DefaultValue="https://VOTRE_COMPTE.github.io/VOTRE_DEPOT/signature.js" />
+        <bt:Url id="JSRuntime.Url" DefaultValue="https://solacomete.github.io/signature-m365/signature.js" />
       </bt:Urls>
     </Resources>
   </VersionOverrides>
