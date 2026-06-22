@@ -14,9 +14,12 @@ export default {
     if (!email) return new Response(JSON.stringify({ error: "Email manquant" }), { headers: corsHeaders });
 
     try {
-      // 1. Test des variables Cloudflare
+      // LE MOUCHARD EST ICI : Il va lister ce qu'il trouve
       if (!env.TENANT_ID || !env.CLIENT_ID || !env.CLIENT_SECRET) {
-          return new Response(JSON.stringify({ error: "Variables manquantes. Vérifie l'onglet Settings > Variables de Cloudflare." }), { headers: corsHeaders });
+          return new Response(JSON.stringify({ 
+              error: "Variables manquantes ou écrasées par le déploiement.", 
+              variables_detectees_par_cloudflare: Object.keys(env) 
+          }), { headers: corsHeaders });
       }
 
       const tokenParams = new URLSearchParams({
@@ -32,7 +35,6 @@ export default {
         body: tokenParams
       });
 
-      // 2. Test de la connexion avec les identifiants
       if (!tokenResponse.ok) {
           const detailErreur = await tokenResponse.json();
           return new Response(JSON.stringify({ error: "Microsoft a refusé les identifiants", details: detailErreur }), { headers: corsHeaders });
@@ -46,7 +48,6 @@ export default {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
-      // 3. Test des permissions de lecture sur l'annuaire
       if (!graphResponse.ok) {
          const detailErreur = await graphResponse.json();
          return new Response(JSON.stringify({ error: "Microsoft bloque la lecture de l'annuaire", details: detailErreur }), { headers: corsHeaders });
@@ -83,9 +84,7 @@ export default {
       });
 
     } catch (error) {
-      return new Response(JSON.stringify({ error: "Crash d'exécution JavaScript", details: error.message }), { headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "Crash", details: error.message }), { headers: corsHeaders });
     }
   }
 };
-
-// test variable
