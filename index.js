@@ -1,6 +1,5 @@
 export default {
   async fetch(request, env, ctx) {
-    // 1. Autorisations CORS pour Outlook
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -19,7 +18,6 @@ export default {
     }
 
     try {
-      // 2. Demande du jeton d'accès (Token) à Microsoft Entra ID
       const tokenParams = new URLSearchParams({
         client_id: env.CLIENT_ID,
         scope: 'https://graph.microsoft.com/.default',
@@ -33,42 +31,43 @@ export default {
         body: tokenParams
       });
 
-      if (!tokenResponse.ok) {
-        throw new Error("Échec de l'authentification Microsoft");
-      }
+      if (!tokenResponse.ok) throw new Error("Échec authentification Microsoft");
 
-      const tokenData = await tokenResponse.json();
-      const accessToken = tokenData.access_token;
-
-      // 3. Interrogation de Microsoft Graph pour récupérer l'utilisateur
+      const accessToken = (await tokenResponse.json()).access_token;
       const graphUrl = `https://graph.microsoft.com/v1.0/users/${email}?$select=displayName,jobTitle,mobilePhone,businessPhones`;
+      
       const graphResponse = await fetch(graphUrl, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
       if (!graphResponse.ok) {
-         return new Response(JSON.stringify({ error: "Utilisateur introuvable dans l'annuaire" }), { status: 404, headers: corsHeaders });
+         return new Response(JSON.stringify({ error: "Utilisateur introuvable" }), { status: 404, headers: corsHeaders });
       }
 
       const userData = await graphResponse.json();
 
-      // 4. Extraction des données (avec gestion des champs vides si le profil n'est pas rempli côté RH)
+      // Extraction conditionnelle stricte des variables
       const nom = userData.displayName || "Collaborateur";
-      const poste = userData.jobTitle || " ";
-      // On prend le mobile en priorité, sinon le tel fixe (businessPhones est un tableau)
-      const tel = userData.mobilePhone || (userData.businessPhones && userData.businessPhones.length > 0 ? userData.businessPhones[0] : " ");
+      const posteHtml = userData.jobTitle ? `<p style="margin: 0; color: #666;">${userData.jobTitle}</p>` : "";
+      
+      let telHtml = "";
+      if (userData.mobilePhone) {
+          telHtml = `<p style="margin: 0;">Tel : ${userData.mobilePhone}</p>`;
+      } else if (userData.businessPhones && userData.businessPhones.length > 0) {
+          telHtml = `<p style="margin: 0;">Tel : ${userData.businessPhones[0]}</p>`;
+      }
 
-      // L'URL de ta bannière actuelle
       const currentBanner = "https://solacomete.github.io/signature-m365/icon-128.png";
 
-      // 5. Génération de la signature finale
+      // Assemblage modulaire du HTML final
       const htmlSignature = `
         <br><br>
         <div style="font-family: Arial, sans-serif; font-size: 10pt; color: #333;">
             <p style="margin: 0;"><strong>${nom}</strong></p>
-            <p style="margin: 0; color: #666;">${poste}</p>
-            ${tel !== " " ? `<p style="margin: 0;">Tel : ${tel}</p>` : ""}
+            ${posteHtml}
+            <p style="margin: 0;">${email}</p>
+            ${telHtml}
             <br>
             <img src="${currentBanner}" alt="Actualité Entreprise" style="max-width: 400px;">
         </div>
@@ -79,7 +78,7 @@ export default {
       });
 
     } catch (error) {
-      return new Response(JSON.stringify({ error: "Erreur serveur interne" }), { status: 500, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500, headers: corsHeaders });
     }
   }
 };
