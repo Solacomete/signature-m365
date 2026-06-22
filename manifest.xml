@@ -2,8 +2,7 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xsi:type="MailApp">
   
   <Id>b7c8d9e0-f1a2-4b3c-9d8e-7f6a5b4c3d2e</Id>
-  <Version>1.0.0.1</Version>
-  
+  <Version>1.0.0.2</Version>
   <ProviderName>DSI Interne</ProviderName>
   <DefaultLocale>fr-FR</DefaultLocale>
   <DisplayName DefaultValue="Signatures Dynamiques" />
@@ -12,6 +11,10 @@
   <IconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-32.png" />
   <HighResolutionIconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-80.png" />
   <SupportUrl DefaultValue="https://github.com/solacomete" />
+
+  <AppDomains>
+    <AppDomain>https://solacomete.github.io</AppDomain>
+  </AppDomains>
 
   <Hosts>
     <Host Name="Mailbox" />
