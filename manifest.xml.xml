@@ -11,7 +11,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://VOTRE_COMPTE.github.io/VOTRE_DEPOT/signature.js" />
+        <SourceLocation DefaultValue="https://solacomete.github.io/signature-m365/signature.js" />
       </DesktopSettings>
     </Form>
   </FormSettings>
