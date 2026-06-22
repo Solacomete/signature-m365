@@ -6,14 +6,14 @@
   xsi:type="MailApp">
 
   <Id>b7c8d9e0-f1a2-4b3c-9d8e-7f6a5b4c3d2e</Id>
-  <Version>1.0.0.4</Version>
+  <Version>1.0.0.5</Version>
   <ProviderName>DSI Interne</ProviderName>
   <DefaultLocale>fr-FR</DefaultLocale>
   <DisplayName DefaultValue="Signatures Dynamiques" />
   <Description DefaultValue="Gestion centralisée des signatures de l'entreprise." />
-  <IconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-80.png" />
-  <SupportUrl DefaultValue="https://github.com/solacomete" />
+  <IconUrl DefaultValue="https://solacomete.github.io/signature-m365/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://solacomete.github.io/signature-m365/icon-80.png" />
+  <SupportUrl DefaultValue="https://solacomete.github.io/signature-m365/index.html" />
 
   <AppDomains>
     <AppDomain>https://solacomete.github.io</AppDomain>
@@ -50,7 +50,6 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read" />
   </Rule>
 
-  <!-- VersionOverrides V1_0 (obligatoire en premier) -->
   <VersionOverrides
     xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
     xsi:type="VersionOverridesV1_0">
@@ -93,9 +92,9 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon16" DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-16.png" />
-        <bt:Image id="Icon32" DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-32.png" />
-        <bt:Image id="Icon80" DefaultValue="https://raw.githubusercontent.com/OfficeDev/office-js-snippets/prod/assets/icon-80.png" />
+        <bt:Image id="Icon16" DefaultValue="https://solacomete.github.io/signature-m365/icon-16.png" />
+        <bt:Image id="Icon32" DefaultValue="https://solacomete.github.io/signature-m365/icon-32.png" />
+        <bt:Image id="Icon80" DefaultValue="https://solacomete.github.io/signature-m365/icon-80.png" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="JSRuntime.Url" DefaultValue="https://solacomete.github.io/signature-m365/signature.js" />
@@ -111,7 +110,6 @@
       </bt:LongStrings>
     </Resources>
 
-    <!-- VersionOverrides V1_1 imbriqué dans V1_0 — LaunchEvent ici -->
     <VersionOverrides
       xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1"
       xsi:type="VersionOverridesV1_1">
@@ -125,19 +123,16 @@
       <Hosts>
         <Host xsi:type="MailHost">
           <DesktopFormFactor>
-            <!-- ✅ Runtime AVEC les deux fichiers : HTML (web/Mac) + JS (Windows classique) -->
             <Runtimes>
               <Runtime resid="WebRuntime.Url" lifetime="short">
                 <Override type="javascript" resid="JSRuntime.Url" />
               </Runtime>
             </Runtimes>
-
             <ExtensionPoint xsi:type="LaunchEvent">
               <LaunchEvents>
+                <!-- ✅ OnNewMessageCompose uniquement — OnMessageReplyCompose n'existe pas -->
                 <LaunchEvent Type="OnNewMessageCompose" FunctionName="insertSignature" />
-                <LaunchEvent Type="OnMessageReplyCompose" FunctionName="insertSignature" />
               </LaunchEvents>
-              <!-- ✅ resid doit pointer vers le runtime HTML -->
               <SourceLocation resid="WebRuntime.Url" />
             </ExtensionPoint>
           </DesktopFormFactor>
@@ -152,9 +147,7 @@
       </Resources>
 
     </VersionOverrides>
-    <!-- fin V1_1 -->
 
   </VersionOverrides>
-  <!-- fin V1_0 -->
 
 </OfficeApp>
