@@ -6,18 +6,19 @@ export default {
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     };
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
-    }
+    if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     const url = new URL(request.url);
     const email = url.searchParams.get("email");
 
-    if (!email) {
-      return new Response(JSON.stringify({ error: "Email manquant" }), { status: 400, headers: corsHeaders });
-    }
+    if (!email) return new Response(JSON.stringify({ error: "Email manquant" }), { headers: corsHeaders });
 
     try {
+      // 1. Test des variables Cloudflare
+      if (!env.TENANT_ID || !env.CLIENT_ID || !env.CLIENT_SECRET) {
+          return new Response(JSON.stringify({ error: "Variables manquantes. Vérifie l'onglet Settings > Variables de Cloudflare." }), { headers: corsHeaders });
+      }
+
       const tokenParams = new URLSearchParams({
         client_id: env.CLIENT_ID,
         scope: 'https://graph.microsoft.com/.default',
@@ -31,7 +32,11 @@ export default {
         body: tokenParams
       });
 
-      if (!tokenResponse.ok) throw new Error("Échec authentification Microsoft");
+      // 2. Test de la connexion avec les identifiants
+      if (!tokenResponse.ok) {
+          const detailErreur = await tokenResponse.json();
+          return new Response(JSON.stringify({ error: "Microsoft a refusé les identifiants", details: detailErreur }), { headers: corsHeaders });
+      }
 
       const accessToken = (await tokenResponse.json()).access_token;
       const graphUrl = `https://graph.microsoft.com/v1.0/users/${email}?$select=displayName,jobTitle,mobilePhone,businessPhones`;
@@ -41,13 +46,14 @@ export default {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
+      // 3. Test des permissions de lecture sur l'annuaire
       if (!graphResponse.ok) {
-         return new Response(JSON.stringify({ error: "Utilisateur introuvable" }), { status: 404, headers: corsHeaders });
+         const detailErreur = await graphResponse.json();
+         return new Response(JSON.stringify({ error: "Microsoft bloque la lecture de l'annuaire", details: detailErreur }), { headers: corsHeaders });
       }
 
       const userData = await graphResponse.json();
 
-      // Extraction conditionnelle stricte des variables
       const nom = userData.displayName || "Collaborateur";
       const posteHtml = userData.jobTitle ? `<p style="margin: 0; color: #666;">${userData.jobTitle}</p>` : "";
       
@@ -60,7 +66,6 @@ export default {
 
       const currentBanner = "https://solacomete.github.io/signature-m365/icon-128.png";
 
-      // Assemblage modulaire du HTML final
       const htmlSignature = `
         <br><br>
         <div style="font-family: Arial, sans-serif; font-size: 10pt; color: #333;">
@@ -78,7 +83,7 @@ export default {
       });
 
     } catch (error) {
-      return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: "Crash d'exécution JavaScript", details: error.message }), { headers: corsHeaders });
     }
   }
 };
