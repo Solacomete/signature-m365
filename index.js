@@ -75,7 +75,7 @@ export default {
             <p style="margin: 0;">${email}</p>
             ${telHtml}
             <br>
-            <img src="${currentBanner}" alt="Actualité Entreprise" style="max-width: 400px;">
+            <img src="${currentBanner}" alt="Actualité Entreprise" width="600" style="max-width: 600px; width: 100%; height: auto; display: block;">
         </div>
       `;
 
