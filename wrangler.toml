@@ -1,3 +1,3 @@
-name = "api-signatures"
+name = "signature-m365"
 main = "index.js"
 compatibility_date = "2024-06-22"
