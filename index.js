@@ -65,7 +65,7 @@ export default {
           telHtml = `<p style="margin: 0;">Tel : ${userData.businessPhones[0]}</p>`;
       }
 
-      const currentBanner = "https://solacomete.github.io/signature-m365/baniere-3-societes.png";
+      const currentBanner = "https://solacomete.github.io/signature-m365/baniere-journee-technique.jpg";
 
       const htmlSignature = `
         <br><br>
